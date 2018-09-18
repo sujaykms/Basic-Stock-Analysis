@@ -1,0 +1,85 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on Mon Jun 25 12:22:08 2018
+
+@author: sujaykakkirala
+"""
+
+import pandas as pd
+from pandas import DataFrame
+import numpy as np
+
+# For Visualization
+import matplotlib.pyplot as plt
+import seaborn as sns
+sns.set_style('whitegrid')
+
+# For reading stock data from yahoo
+from pandas_datareader import data
+
+# For time stamps
+from datetime import datetime
+
+end = datetime.now()
+start = datetime(end.year,end.month-3,end.day)
+
+microsoft = data.DataReader("MSFT", "iex", start, end)
+google = data.DataReader("GOOG", "iex", start, end)
+apple = data.DataReader("AAPL","iex",start,end)
+
+#print(type(apple))
+#print(apple.head(6))
+#print(apple.tail(6))
+
+#print(apple["close"])
+df = DataFrame({ 'aapl': apple['close'], 'msft': microsoft['close'],'goog': google['close']}) 
+
+#print(df.head())
+
+print()
+plt.figure()
+df.plot(legend = True, figsize = (10,4), x_compat = True, title = 'Daily close')
+plt.title('Daily Close',fontname= 'Times New Roman', size ='20')
+plt.ylabel('price', size='14') 
+
+apple['returns'] = apple['close'].pct_change() 
+microsoft['returns'] = microsoft['close'].pct_change() 
+google['returns'] = google['close'].pct_change() 
+
+df2 = DataFrame({'aapl': apple['returns'], 'goog' : google['returns'], 'msft' : microsoft['returns']})
+
+df2 = df2.dropna()
+
+plt.figure()
+df2.plot(legend = True, figsize = (10,4), x_compat = True, title='Daily returns %')
+plt.title('Daily Returns %', fontname = 'Times New Roman', size = '20')
+plt.ylabel('%',size='14') 
+
+
+apple['10d'] = apple['close'].rolling(window = 10, center = False).mean()
+apple['20d'] = apple['close'].rolling(window = 20, center = False).mean()
+apple['50d'] = apple['close'].rolling(window = 50, center = False).mean()
+
+apple[['close','10d','20d','50d']].plot(subplots=False,figsize=(8,6), title ='Apple MA')
+
+microsoft['10d'] = microsoft['close'].rolling(window = 10, center = False).mean()
+microsoft['20d'] = microsoft['close'].rolling(window = 20, center = False).mean()
+microsoft['50d'] = microsoft['close'].rolling(window = 50, center = False).mean()
+
+microsoft[['close','10d','20d','50d']].plot(subplots=False,figsize=(8,6), title ='Msft MA')
+
+google['10d'] = google['close'].rolling(window = 10, center = False).mean()
+google['20d'] = google['close'].rolling(window = 20, center = False).mean()
+google['50d'] = google['close'].rolling(window = 50, center = False).mean()
+
+google[['close','10d','20d','50d']].plot(subplots=False,figsize=(8,6), title ='google MA')
+
+
+
+#stocks = pd.DataFrame({"AAPL": apple["Close"],
+                      #"MSFT": microsoft["Close"],
+                      #"GOOG": google["Close"]})
+
+#print(stocks.head())
+#print(stocks.tail())
